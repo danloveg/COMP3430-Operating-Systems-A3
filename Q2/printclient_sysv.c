@@ -35,4 +35,6 @@ int main(int argc, char *argv[]) {
     // Add 6 print jobs to the queue
 
     // Exit when done
+
+    printf("Client exiting.\n");
 }

@@ -33,4 +33,6 @@ int main(int argc, char *argv[]) {
     // Signal to client in the shared segment that we are ready.
 
     // Continuously print jobs from the queue
+
+    printf("Print server exiting.\n");
 }
