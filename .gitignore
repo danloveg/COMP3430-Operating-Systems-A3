@@ -3,3 +3,6 @@ Q2/manager
 Q2/server
 Q2/client
 
+# Ignore vscode folder
+.vscode/
+
