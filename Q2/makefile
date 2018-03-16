@@ -1,6 +1,6 @@
 CC=gcc
 FLAGS=-Wall
-LIBS=-lrt
+LIBS=-lrt -pthread
 
 default:
 	$(CC) $(FLAGS) -o manager printmanager_sysv.c $(LIBS)
