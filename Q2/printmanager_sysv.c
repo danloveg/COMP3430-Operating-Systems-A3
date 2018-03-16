@@ -15,13 +15,15 @@
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <string.h>
 #include <unistd.h>
 
 void startClientAndServerProcs();
 
 
 int main(int argc, char *argv[]) {
-    int shmid = 0;
+    int shmid, status = 0;
+    char * shmseg;
 
     // Create the shared segment for client and server
     if ((shmid = shmget(KEY, SIZE, IPC_CREAT | 0666)) < 0) {
@@ -29,6 +31,27 @@ int main(int argc, char *argv[]) {
         exit(1);
     } else {
         printf("SysV segment created.\n");
+    }
+
+    // Attach segment
+    if ((shmseg = shmat(shmid, NULL, 0)) == (char *) -1) {
+        perror("shmat failed");
+        exit(1);
+    }
+
+    // Create queue
+    PrintQueue * queue = (PrintQueue *) calloc(1, sizeof(PrintQueue));
+    queue -> maxLen = QUEUE_LEN;
+    queue -> currLen = 0;
+    queue -> currIndex = 0;
+
+    // Place the queue in shared memory
+    memcpy(shmseg, queue, sizeof(PrintQueue));
+
+    // Detach segment
+    if ((status = shmdt(shmseg)) != 0) {
+        perror("shmdt failed");
+        exit(1);
     }
 
     // Start client and server
