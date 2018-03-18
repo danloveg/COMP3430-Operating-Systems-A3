@@ -19,10 +19,11 @@
 #define FILE_SIZE_MIN 500
 #define SLEEP_TIME_MAX 3
 #define TIME_FORMAT "%Y/%m/%d %H:%M:%S"
+#define FILENAME_SIZE 64
 
 typedef struct __PRINT_REQUEST {
     long clientID;
-    char filename[64];
+    char filename[FILENAME_SIZE];
     int fileSize;
 } PrintRequest;
 
