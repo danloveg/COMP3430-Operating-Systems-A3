@@ -3,16 +3,20 @@
 //
 // Purpose: "Print" jobs submitted by the client from the shared queue.
 // Author: Daniel Lovegrove
-// Version: Mar 15/2018
+// Version: Mar 18/2018
 // *****************************************************************************
 
 #include "manager.h"
+#include <assert.h>
 #include <semaphore.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+PrintQueue * queue;
 
 
 int main(int argc, char *argv[]) {
@@ -31,9 +35,30 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Signal to client in the shared segment that we are ready.
+    // The manager placed the queue at the first address
+    queue = (PrintQueue *) shmseg;
 
     // Continuously print jobs from the queue
+    while (1) {
 
-    printf("Print server exiting.\n");
+    }
+}
+
+
+/**
+ * Remove an item from the queue.
+ */
+bool leave(PrintRequest **req) {
+    assert(queue != NULL && "Queue must be initialized");
+    bool reqReturned = false;
+
+    // If not empty...
+    if ((queue -> currLen) != 0) {
+        (*req) = &(queue -> queueArray[queue -> currIndex]);
+        queue -> currIndex = (queue -> currIndex + 1) % queue -> maxLen;
+        queue -> currLen--;
+        reqReturned = true;
+    }
+
+    return reqReturned;
 }
