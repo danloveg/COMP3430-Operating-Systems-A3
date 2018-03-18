@@ -94,10 +94,10 @@ void createSemaphores() {
         }
     }
 
-    if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
+    if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, QUEUE_LEN) == SEM_FAILED) {
         // Error, unlink and try again
         sem_unlink(EMPTY_SEM_NAME);
-        if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
+        if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, QUEUE_LEN) == SEM_FAILED) {
             perror("Error creating 'empty' semaphore");
             exit(1);
         }
