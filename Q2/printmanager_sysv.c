@@ -73,7 +73,8 @@ void initQueue(char * shmAddress) {
 
 
 /**
- * Starts the client and print server in separate processes
+ * Starts the client and print server. The client is run in a child process and
+ * the server is run in this process.
  */
 void startClientAndServerProcs() {
     int pid, ret;
@@ -86,11 +87,7 @@ void startClientAndServerProcs() {
         ret = execv("./client", clientArgs);
         assert(ret != 0 && "Client failed");
     } else {
-        pid = fork();
-
-        if (pid == 0) {
-            ret = execv("./server", serverArgs);
-            assert(ret != 0 && "Client failed");
-        }
+        ret = execv("./server", serverArgs);
+        assert(ret != 0 && "Client failed");
     }
 }
