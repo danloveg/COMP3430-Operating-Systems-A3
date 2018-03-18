@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall
+FLAGS=-g -Wall
 LIBS=-lrt -pthread
 
 default:
