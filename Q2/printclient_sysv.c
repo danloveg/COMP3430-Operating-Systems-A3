@@ -7,6 +7,7 @@
 // *****************************************************************************
 
 #include "manager.h"
+#include <assert.h>
 #include <semaphore.h>
 #include <sys/types.h>
 #include <string.h>
@@ -15,8 +16,10 @@
 #include <sys/shm.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 void insertIntoBoundedBuffer(PrintRequest * req);
+PrintQueue * queue = NULL;
 
 
 int main(int argc, char *argv[]) {
@@ -38,6 +41,9 @@ int main(int argc, char *argv[]) {
         perror("shmat failed");
         exit(1);
     }
+
+    // The manager placed the queue at the first address
+    queue = (PrintQueue *) shmseg;
 
     // Add 6 print jobs to the queue
     for (i = 0; i < NUM_ITERATIONS; i++) {
@@ -64,7 +70,26 @@ int main(int argc, char *argv[]) {
     exit(0);
 }
 
+
 // TODO: Complete
 void insertIntoBoundedBuffer(PrintRequest * req) {
+    assert(queue != NULL && "Queue must be initialized");
+}
 
+
+/**
+ * Add an item to the queue.
+ */
+bool enter(PrintRequest * req) {
+    assert(queue != NULL && "Queue must be initialized");
+    bool entered = false;
+
+    // If not full...
+    if ((queue -> currLen) != (queue -> maxLen)) {
+        queue -> queueArray[(queue -> currIndex + queue -> currLen) % queue -> maxLen] = *req;
+        queue -> currLen++;
+        entered = true;
+    }
+
+    return entered;
 }
