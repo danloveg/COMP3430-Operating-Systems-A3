@@ -18,6 +18,7 @@
 #include <string.h>
 #include <unistd.h>
 
+void initQueue(char * shmAddress);
 void startClientAndServerProcs();
 
 
@@ -39,14 +40,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Create queue
-    PrintQueue * queue = (PrintQueue *) calloc(1, sizeof(PrintQueue));
-    queue -> maxLen = QUEUE_LEN;
-    queue -> currLen = 0;
-    queue -> currIndex = 0;
-
-    // Place the queue in shared memory
-    memcpy(shmseg, queue, sizeof(PrintQueue));
+    initQueue(shmseg);
 
     // Detach segment
     if ((status = shmdt(shmseg)) != 0) {
@@ -54,8 +48,27 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    // Start client and server
+    // Start client and server then exit
     startClientAndServerProcs();
+}
+
+
+/**
+ * Initialize the print queue and place it in shared memory. The print queue is
+ * placed at the starting address of the shared memory segment.
+ *
+ * @param char * shmAddress: The address of the initialized shared memory
+ * segment
+ */
+void initQueue(char * shmAddress) {
+    // Create queue
+    PrintQueue * queue = (PrintQueue *) calloc(1, sizeof(PrintQueue));
+    queue -> maxLen = QUEUE_LEN;
+    queue -> currLen = 0;
+    queue -> currIndex = 0;
+
+    // Place the queue in shared memory
+    memcpy(shmAddress, queue, sizeof(PrintQueue));
 }
 
 

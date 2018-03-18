@@ -10,7 +10,7 @@
 #define PRINT_MANAGER_SYSV
 
 #define KEY 7763168
-#define SIZE 1024
+#define SIZE 512
 #define QUEUE_LEN 4
 
 typedef struct __PRINT_REQUEST {
