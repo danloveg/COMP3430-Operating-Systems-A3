@@ -19,8 +19,10 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include <semaphore.h>
 
 void initQueue(char * shmAddress);
+void createSemaphores();
 void startClientAndServerProcs();
 
 
@@ -32,8 +34,6 @@ int main(int argc, char *argv[]) {
     if ((shmid = shmget(KEY, SIZE, IPC_CREAT | 0666)) < 0) {
         perror("shmget failed");
         exit(1);
-    } else {
-        printf("SysV segment created.\n");
     }
 
     // Attach segment
@@ -43,12 +43,15 @@ int main(int argc, char *argv[]) {
     }
 
     initQueue(shmseg);
+    createSemaphores();
 
     // Detach segment
     if ((status = shmdt(shmseg)) != 0) {
         perror("shmdt failed");
         exit(1);
     }
+
+    printf("SysV segment setup complete, starting Client and Server.\n");
 
     // Start client and server then exit
     startClientAndServerProcs();
@@ -71,6 +74,43 @@ void initQueue(char * shmAddress) {
 
     // Place the queue in shared memory
     memcpy(shmAddress, queue, sizeof(PrintQueue));
+}
+
+
+/**
+ * Create the three named semaphores needed for the client and server to insert
+ * and remove from the bounded queue.
+ */
+void createSemaphores() {
+    // Note: semaphore with initial value 1 are mutexes, while initial value 0
+    //       means it is a signalling semaphore.
+
+    if (sem_open(MUTEX_SEM_NAME, O_CREAT | O_EXCL, 0644, 1) == SEM_FAILED) {
+        // Error, unlink and try again
+        sem_unlink(MUTEX_SEM_NAME);
+        if (sem_open(MUTEX_SEM_NAME, O_CREAT | O_EXCL, 0644, 1) == SEM_FAILED) {
+            perror("Error creating mutex semaphore");
+            exit(1);
+        }
+    }
+
+    if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
+        // Error, unlink and try again
+        sem_unlink(EMPTY_SEM_NAME);
+        if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
+            perror("Error creating 'empty' semaphore");
+            exit(1);
+        }
+    }
+
+    if (sem_open(FULL_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
+        // Error, unlink and try again
+        sem_unlink(FULL_SEM_NAME);
+        if (sem_open(FULL_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
+            perror("Error creating 'full' semaphore");
+            exit(1);
+        }
+    }
 }
 
 

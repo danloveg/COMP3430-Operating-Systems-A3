@@ -11,6 +11,9 @@
 
 #define KEY 7763168
 #define SIZE 512
+#define MUTEX_SEM_NAME "/mutex"
+#define EMPTY_SEM_NAME "/empty"
+#define FULL_SEM_NAME "/empty"
 #define QUEUE_LEN 4
 #define BYTES_PER_SEC 4000
 #define BUF_SIZE 32
