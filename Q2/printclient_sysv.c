@@ -19,7 +19,12 @@
 #include <stdbool.h>
 
 void insertIntoBoundedBuffer(PrintRequest * req);
+bool enter(PrintRequest * req);
+
 PrintQueue * queue = NULL;
+sem_t * mutex;
+sem_t * full;
+sem_t * empty;
 
 
 int main(int argc, char *argv[]) {
@@ -44,6 +49,11 @@ int main(int argc, char *argv[]) {
 
     // The manager placed the queue at the first address
     queue = (PrintQueue *) shmseg;
+
+    // Get the semaphores
+    mutex = sem_open(MUTEX_SEM_NAME, 0);
+    full = sem_open(FULL_SEM_NAME, 0);
+    empty = sem_open(EMPTY_SEM_NAME, 0);
 
     // Add 6 print jobs to the queue
     for (i = 0; i < NUM_ITERATIONS; i++) {
@@ -71,9 +81,20 @@ int main(int argc, char *argv[]) {
 }
 
 
-// TODO: Complete
+/**
+ * Insert a print request into the bounded queue. Uses the three named
+ * semaphores created by the manager to facilitate safe access to the queue.
+ */
 void insertIntoBoundedBuffer(PrintRequest * req) {
     assert(queue != NULL && "Queue must be initialized");
+
+    /* TODO: Uncomment
+    sem_wait(empty); // Wait if zero empty slots
+    sem_wait(mutex); // Lock mutex
+    enter(req);
+    sem_post(mutex); // Unlock mutex
+    sem_post(full);  // Increment full spaces
+    */
 }
 
 
