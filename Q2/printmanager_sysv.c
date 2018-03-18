@@ -1,9 +1,11 @@
 // *****************************************************************************
 // printmanager.c
 //
-// Purpose: Create shared memory segment and start up print server/client
+// Purpose: Create shared memory segment and queue, then start up print server
+//          and client. This process will be replaced by the server process so
+//          that it will exit when the server exits.
 // Author: Daniel Lovegrove
-// Version: Mar 15/2018
+// Version: Mar 18/2018
 // *****************************************************************************
 
 #include "manager.h"
@@ -74,7 +76,8 @@ void initQueue(char * shmAddress) {
 
 /**
  * Starts the client and print server. The client is run in a child process and
- * the server is run in this process.
+ * the server is run in this process. As such, this process is replaced by the
+ * server.
  */
 void startClientAndServerProcs() {
     int pid, ret;
