@@ -11,6 +11,7 @@
 #include <semaphore.h>
 #include <sys/types.h>
 #include <string.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -50,10 +51,19 @@ int main(int argc, char *argv[]) {
     // The manager placed the queue at the first address
     queue = (PrintQueue *) shmseg;
 
-    // Get the semaphores
-    mutex = sem_open(MUTEX_SEM_NAME, 0);
-    full = sem_open(FULL_SEM_NAME, 0);
-    empty = sem_open(EMPTY_SEM_NAME, 0);
+    // Open the semaphores
+    if ((mutex = sem_open(MUTEX_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get mutex semaphore\n");
+        exit(1);
+    }
+    if ((full = sem_open(FULL_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get full semaphore\n");
+        exit(1);
+    }
+    if ((empty = sem_open(EMPTY_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get empty semaphore\n");
+        exit(1);
+    }
 
     // Add 6 print jobs to the queue
     for (i = 0; i < NUM_ITERATIONS; i++) {
@@ -74,6 +84,11 @@ int main(int argc, char *argv[]) {
         sleep(rand_r(&randseed) % (SLEEP_TIME_MAX + 1));
     }
 
+    // Close semaphores
+    sem_close(mutex);
+    sem_close(full);
+    sem_close(empty);
+
     // Exit when done
     printf("Client exiting.\n");
 
@@ -88,13 +103,11 @@ int main(int argc, char *argv[]) {
 void insertIntoBoundedBuffer(PrintRequest * req) {
     assert(queue != NULL && "Queue must be initialized");
 
-    /* TODO: Uncomment
     sem_wait(empty); // Wait if zero empty slots
     sem_wait(mutex); // Lock mutex
     enter(req);
     sem_post(mutex); // Unlock mutex
     sem_post(full);  // Increment full spaces
-    */
 }
 
 
@@ -108,6 +121,7 @@ bool enter(PrintRequest * req) {
     // If not full...
     if ((queue -> currLen) != (queue -> maxLen)) {
         queue -> queueArray[(queue -> currIndex + queue -> currLen) % queue -> maxLen] = *req;
+        //memcpy(&(queue -> queueArray[(queue -> currIndex + queue -> currLen) % queue -> maxLen]), req, sizeof(PrintRequest));
         queue -> currLen++;
         entered = true;
     }
