@@ -2,6 +2,7 @@
 Q[23]/manager
 Q[23]/server
 Q[23]/client
+Q3/shutdown
 
 # Ignore vscode folder
 .vscode/
