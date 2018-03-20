@@ -23,6 +23,7 @@
 
 void initQueue(char * shmAddress);
 void createSemaphores();
+void createNamedSemaphore(char * name, int value);
 void startClientAndServerProcs();
 
 
@@ -79,37 +80,43 @@ void initQueue(char * shmAddress) {
 
 /**
  * Create the three named semaphores needed for the client and server to insert
- * and remove from the bounded queue.
+ * and remove from the bounded queue. The following webpage was very helpful:
+ * https://stackoverflow.com/questions/32205396/share-posix-semaphore-among-multiple-processes
  */
 void createSemaphores() {
-    // Note: semaphore with initial value 1 are mutexes, while initial value 0
-    //       means it is a signalling semaphore.
+    createNamedSemaphore(MUTEX_SEM_NAME, 1); // Init val 1 is a mutex
+    createNamedSemaphore(EMPTY_SEM_NAME, QUEUE_LEN);
+    createNamedSemaphore(FULL_SEM_NAME, 0);
+}
 
-    if (sem_open(MUTEX_SEM_NAME, O_CREAT | O_EXCL, 0644, 1) == SEM_FAILED) {
-        // Error, unlink and try again
-        sem_unlink(MUTEX_SEM_NAME);
-        if (sem_open(MUTEX_SEM_NAME, O_CREAT | O_EXCL, 0644, 1) == SEM_FAILED) {
-            perror("Error creating mutex semaphore");
+
+/**
+ * Create a single named semaphore with the specified name and starting value.
+ *
+ * @param char * name: The name of the semaphore
+ * @param int value: The starting value of the semaphore
+ */
+void createNamedSemaphore(char * name, int value) {
+    assert(name != NULL && "Named semaphore cannot have a null name");
+    sem_t * semaphore;
+
+    // Create named semaphore. If fails, unlink and try again
+    if ((semaphore = sem_open(name, O_CREAT | O_EXCL, 0777, value)) == SEM_FAILED) {
+        sem_unlink(name);
+        if ((semaphore = sem_open(name, O_CREAT | O_EXCL, 0777, value)) == SEM_FAILED) {
+            char errBuf[128];
+            char *errorMessage = &errBuf[0];
+            sprintf(errorMessage, "Error creating semaphore with name %s", name);
+            perror(errorMessage);
             exit(1);
         }
     }
 
-    if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, QUEUE_LEN) == SEM_FAILED) {
-        // Error, unlink and try again
-        sem_unlink(EMPTY_SEM_NAME);
-        if (sem_open(EMPTY_SEM_NAME, O_CREAT | O_EXCL, 0644, QUEUE_LEN) == SEM_FAILED) {
-            perror("Error creating 'empty' semaphore");
-            exit(1);
-        }
-    }
-
-    if (sem_open(FULL_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
-        // Error, unlink and try again
-        sem_unlink(FULL_SEM_NAME);
-        if (sem_open(FULL_SEM_NAME, O_CREAT | O_EXCL, 0644, 0) == SEM_FAILED) {
-            perror("Error creating 'full' semaphore");
-            exit(1);
-        }
+    // We don't need this semaphore so close it
+    if (sem_close(semaphore) < 0) {
+        perror("sem_close failed");
+        sem_unlink(name);
+        exit(1);
     }
 }
 
