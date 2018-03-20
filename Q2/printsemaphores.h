@@ -15,7 +15,6 @@
 #define FULL_SEM_NAME "/full.sem"
 
 void createSemaphores();
-void createNamedSemaphore(char * name, int value);
 void openSemaphores(sem_t ** mutex, sem_t ** empty, sem_t ** full);
 void closeSemaphores(sem_t ** mutex, sem_t ** empty, sem_t ** full);
 

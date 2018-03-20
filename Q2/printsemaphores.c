@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void createNamedSemaphore(char * name, int value);
 
 /**
  * Create the three named semaphores needed for the client and server to insert
