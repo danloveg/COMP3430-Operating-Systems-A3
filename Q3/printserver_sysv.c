@@ -99,6 +99,8 @@ int main(int argc, char *argv[]) {
         printf("\tFilename:  %s\n", &(currentJob -> filename)[0]);
         printf("\tFile size: %d\n", currentJob -> fileSize);
     }
+
+    return 0;
 }
 
 

@@ -40,4 +40,6 @@ int main(int argc, char *argv[]) {
     } else {
         printf("shutdown requires a single argument.\n");
     }
+
+    return 0;
 }

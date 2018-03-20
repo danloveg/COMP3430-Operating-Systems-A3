@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
 
     // Start client and server
     startClientAndServerProcs();
+
+    return 0;
 }
 
 
