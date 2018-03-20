@@ -143,7 +143,7 @@ bool leave(PrintRequest **req) {
  */
 void catch_signal(int sig) {
     if (sig == SIGUSR1) {
-        printf("\nCaught CTRL-C. Cleaning up and exiting.\n");
+        printf("\nCaught shutdown signal. Cleaning up and exiting.\n");
 
         // Close the semaphores
         closeSemaphores(&mutex, &empty, &full);
