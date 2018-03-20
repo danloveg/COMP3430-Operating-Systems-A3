@@ -8,20 +8,38 @@
 
 #include "manager.h"
 #include <assert.h>
+#include <fcntl.h>
 #include <semaphore.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
+#include <time.h>
+#include <unistd.h>
 
-PrintQueue * queue;
+void removeFromBoundedBuffer(PrintRequest ** req);
+bool leave(PrintRequest **req);
+
+PrintQueue * queue = NULL;
+sem_t * mutex;
+sem_t * full;
+sem_t * empty;
 
 
 int main(int argc, char *argv[]) {
     char *shmseg;
     int shmid;
+    long pid = getpid();
+    int timeToPrint;
+    time_t currentTime;
+    struct tm * tmInfo;
+    char time_buf[BUF_SIZE];
+    char * timeString = &time_buf[0];
+    PrintRequest * job = NULL;
+    PrintRequest * currentJob = NULL;
 
     // Locate segment
     if ((shmid = shmget(KEY, SIZE, 0666)) < 0) {
@@ -38,10 +56,71 @@ int main(int argc, char *argv[]) {
     // The manager placed the queue at the first address
     queue = (PrintQueue *) shmseg;
 
+    // Open the semaphores
+    if ((mutex = sem_open(MUTEX_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get mutex semaphore\n");
+        exit(1);
+    }
+    if ((full = sem_open(FULL_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get full semaphore\n");
+        exit(1);
+    }
+    if ((empty = sem_open(EMPTY_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get empty semaphore\n");
+        exit(1);
+    }
+
+    currentJob = (PrintRequest *) malloc(sizeof(PrintRequest));
+    if (currentJob == NULL) {
+        printf("malloc failed\n");
+        exit(1);
+    }
+
     // Continuously print jobs from the queue
     while (1) {
+        removeFromBoundedBuffer(&job);
+        memcpy(currentJob, job, sizeof(PrintRequest));
+        assert(currentJob != NULL && "Job cannot be NULL");
 
+        time(&currentTime);
+        tmInfo = localtime(&currentTime);
+        strftime(timeString, BUF_SIZE, TIME_FORMAT, tmInfo);
+
+        printf("Printer %ld STARTED print job:\n", pid);
+        printf("\tTime:      %s\n", timeString);
+        printf("\tClient ID: %ld\n", currentJob -> clientID);
+        printf("\tFilename:  %s\n", &(currentJob -> filename)[0]);
+        printf("\tFile size: %d\n", currentJob -> fileSize);
+
+        // Sleep to mimic printing
+        timeToPrint = (currentJob -> fileSize) / BYTES_PER_SEC;
+        sleep(timeToPrint);
+
+        time(&currentTime);
+        tmInfo = localtime(&currentTime);
+        strftime(timeString, BUF_SIZE, TIME_FORMAT, tmInfo);
+
+        printf("Printer %ld FINISHED print job:\n", pid);
+        printf("\tTime:      %s\n", timeString);
+        printf("\tClient ID: %ld\n", currentJob -> clientID);
+        printf("\tFilename:  %s\n", &(currentJob -> filename)[0]);
+        printf("\tFile size: %d\n", currentJob -> fileSize);
     }
+}
+
+
+/**
+ * Removes a print request from the bounded queue. Uses the three named
+ * semaphores created by the manager to facilitate safe access to the queue.
+ */
+void removeFromBoundedBuffer(PrintRequest ** req) {
+    assert(queue != NULL && "Queue must be initialized");
+
+    sem_wait(full);  // Wait until at least one full space
+    sem_wait(mutex); // Lock the mutex
+    leave(req);
+    sem_post(mutex); // Unlock the mutex
+    sem_post(empty); // Increment the amount of empty spaces
 }
 
 
