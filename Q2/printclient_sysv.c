@@ -7,6 +7,7 @@
 // *****************************************************************************
 
 #include "manager.h"
+#include "printsemaphores.h"
 #include <assert.h>
 #include <semaphore.h>
 #include <sys/types.h>
@@ -21,6 +22,8 @@
 
 void insertIntoBoundedBuffer(PrintRequest * req);
 bool enter(PrintRequest * req);
+void openSemaphores();
+void closeSemaphores();
 
 PrintQueue * queue = NULL;
 sem_t * mutex;
@@ -51,19 +54,8 @@ int main(int argc, char *argv[]) {
     // The manager placed the queue at the first address
     queue = (PrintQueue *) shmseg;
 
-    // Open the semaphores
-    if ((mutex = sem_open(MUTEX_SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        printf("Client could not get mutex semaphore\n");
-        exit(1);
-    }
-    if ((full = sem_open(FULL_SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        printf("Client could not get full semaphore\n");
-        exit(1);
-    }
-    if ((empty = sem_open(EMPTY_SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        printf("Client could not get empty semaphore\n");
-        exit(1);
-    }
+    openSemaphores();
+
 
     // Add 6 print jobs to the queue
     for (i = 0; i < NUM_ITERATIONS; i++) {
@@ -84,10 +76,7 @@ int main(int argc, char *argv[]) {
         sleep(rand_r(&randseed) % (SLEEP_TIME_MAX + 1));
     }
 
-    // Close semaphores
-    sem_close(mutex);
-    sem_close(full);
-    sem_close(empty);
+    closeSemaphores();
 
     // Exit when done
     printf("Client exiting.\n");
@@ -127,4 +116,39 @@ bool enter(PrintRequest * req) {
     }
 
     return entered;
+}
+
+
+/**
+ * Open the three named semaphores.
+ */
+void openSemaphores() {
+    if ((mutex = sem_open(MUTEX_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get mutex semaphore\n");
+        exit(1);
+    }
+    if ((full = sem_open(FULL_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get full semaphore\n");
+        exit(1);
+    }
+    if ((empty = sem_open(EMPTY_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get empty semaphore\n");
+        exit(1);
+    }
+}
+
+
+/**
+ * Close the three named semaphores.
+ */
+void closeSemaphores() {
+    if (mutex != NULL) {
+        sem_close(mutex);
+    }
+    if (full != NULL) {
+        sem_close(full);
+    }
+    if (empty != NULL) {
+        sem_close(empty);
+    }
 }

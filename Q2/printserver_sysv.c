@@ -7,6 +7,7 @@
 // *****************************************************************************
 
 #include "manager.h"
+#include "printsemaphores.h"
 #include <assert.h>
 #include <fcntl.h>
 #include <semaphore.h>

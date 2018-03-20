@@ -3,7 +3,7 @@ FLAGS=-g -Wall
 LIBS=-lrt -pthread
 
 default:
-	$(CC) $(FLAGS) -o manager printmanager_sysv.c $(LIBS)
+	$(CC) $(FLAGS) -o manager printmanager_sysv.c printsemaphores.c $(LIBS)
 	$(CC) $(FLAGS) -o server printserver_sysv.c $(LIBS)
 	$(CC) $(FLAGS) -o client printclient_sysv.c $(LIBS)
 
