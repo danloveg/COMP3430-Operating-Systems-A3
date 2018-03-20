@@ -3,7 +3,7 @@
 //
 // Purpose: "Print" jobs submitted by the client from the shared queue.
 // Author: Daniel Lovegrove
-// Version: Mar 19/2018
+// Version: Mar 20/2018
 // *****************************************************************************
 
 #include "manager.h"
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     PrintRequest * currentJob = NULL;
 
     // Set up signal catcher
-    if (signal(SIGINT, catch_signal) == SIG_ERR) {
+    if (signal(SIGUSR1, catch_signal) == SIG_ERR) {
         perror("setup of SIGINT handler failed");
         exit(1);
     }
@@ -142,7 +142,7 @@ bool leave(PrintRequest **req) {
  * @param int sig: The signal received.
  */
 void catch_signal(int sig) {
-    if (sig == SIGINT) {
+    if (sig == SIGUSR1) {
         printf("\nCaught CTRL-C. Cleaning up and exiting.\n");
 
         // Close the semaphores
