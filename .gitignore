@@ -1,7 +1,7 @@
 # Ignore exectuables
-Q2/manager
-Q2/server
-Q2/client
+Q[23]/manager
+Q[23]/server
+Q[23]/client
 
 # Ignore vscode folder
 .vscode/
