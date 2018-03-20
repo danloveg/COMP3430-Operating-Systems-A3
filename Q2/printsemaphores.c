@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 /**
  * Create the three named semaphores needed for the client and server to insert
  * and remove from the bounded queue. The following webpage was very helpful:
@@ -54,5 +55,40 @@ void createNamedSemaphore(char * name, int value) {
         perror("sem_close failed");
         sem_unlink(name);
         exit(1);
+    }
+}
+
+
+/**
+ * Open the three named semaphores.
+ */
+void openSemaphores(sem_t ** mutex, sem_t ** empty, sem_t ** full) {
+    if ((*mutex = sem_open(MUTEX_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get mutex semaphore\n");
+        exit(1);
+    }
+    if ((*full = sem_open(FULL_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get full semaphore\n");
+        exit(1);
+    }
+    if ((*empty = sem_open(EMPTY_SEM_NAME, O_RDWR)) == SEM_FAILED) {
+        printf("Client could not get empty semaphore\n");
+        exit(1);
+    }
+}
+
+
+/**
+ * Close the three named semaphores.
+ */
+void closeSemaphores(sem_t ** mutex, sem_t ** empty, sem_t ** full) {
+    if (*mutex != NULL) {
+        sem_close(*mutex);
+    }
+    if (*full != NULL) {
+        sem_close(*full);
+    }
+    if (*empty != NULL) {
+        sem_close(*empty);
     }
 }

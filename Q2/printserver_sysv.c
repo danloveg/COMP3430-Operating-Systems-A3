@@ -10,7 +10,6 @@
 #include "printsemaphores.h"
 #include <assert.h>
 #include <fcntl.h>
-#include <semaphore.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -25,9 +24,7 @@ void removeFromBoundedBuffer(PrintRequest ** req);
 bool leave(PrintRequest **req);
 
 PrintQueue * queue = NULL;
-sem_t * mutex;
-sem_t * full;
-sem_t * empty;
+sem_t * mutex, * full, * empty;
 
 
 int main(int argc, char *argv[]) {
@@ -57,22 +54,9 @@ int main(int argc, char *argv[]) {
     // The manager placed the queue at the first address
     queue = (PrintQueue *) shmseg;
 
-    // Open the semaphores
-    if ((mutex = sem_open(MUTEX_SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        printf("Client could not get mutex semaphore\n");
-        exit(1);
-    }
-    if ((full = sem_open(FULL_SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        printf("Client could not get full semaphore\n");
-        exit(1);
-    }
-    if ((empty = sem_open(EMPTY_SEM_NAME, O_RDWR)) == SEM_FAILED) {
-        printf("Client could not get empty semaphore\n");
-        exit(1);
-    }
+    openSemaphores(&mutex, &empty, &full);
 
-    currentJob = (PrintRequest *) malloc(sizeof(PrintRequest));
-    if (currentJob == NULL) {
+    if ((currentJob = (PrintRequest *) malloc(sizeof(PrintRequest))) == NULL) {
         printf("malloc failed\n");
         exit(1);
     }
@@ -80,7 +64,7 @@ int main(int argc, char *argv[]) {
     // Continuously print jobs from the queue
     while (1) {
         removeFromBoundedBuffer(&job);
-        memcpy(currentJob, job, sizeof(PrintRequest));
+        memcpy(currentJob, job, sizeof(PrintRequest)); // Copy in case shared data changes
         assert(currentJob != NULL && "Job cannot be NULL");
 
         time(&currentTime);
