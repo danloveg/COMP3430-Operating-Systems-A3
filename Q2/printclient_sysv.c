@@ -3,7 +3,7 @@
 //
 // Purpose: Add jobs to be "printed" to the print queue
 // Author: Daniel Lovegrove
-// Version: Mar 18/2018
+// Version: Mar 19/2018
 // *****************************************************************************
 
 #include "manager.h"
@@ -71,6 +71,12 @@ int main(int argc, char *argv[]) {
     }
 
     closeSemaphores(&mutex, &empty, &full);
+
+    // Detach segment
+    if (shmdt(shmseg) != 0) {
+        perror("shmdt failed");
+        exit(1);
+    }
 
     // Exit when done
     printf("Client exiting.\n");

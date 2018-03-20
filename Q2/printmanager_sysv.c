@@ -5,7 +5,7 @@
 //          and client. This process will be replaced by the server process so
 //          that it will exit when the server exits.
 // Author: Daniel Lovegrove
-// Version: Mar 18/2018
+// Version: Mar 19/2018
 // *****************************************************************************
 
 #include "manager.h"
@@ -26,7 +26,7 @@ void startClientAndServerProcs();
 
 
 int main(int argc, char *argv[]) {
-    int shmid, status = 0;
+    int shmid = 0;
     char * shmseg;
 
     // Create the shared segment for client and server
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
     createSemaphores();
 
     // Detach segment
-    if ((status = shmdt(shmseg)) != 0) {
+    if (shmdt(shmseg) != 0) {
         perror("shmdt failed");
         exit(1);
     }
