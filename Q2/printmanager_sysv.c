@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    printf("SysV segment setup complete, starting Client and Server.\n");
+    printf("SysV segment setup complete, starting Client and Server.\n\n");
 
     // Start client and server then exit
     startClientAndServerProcs();
