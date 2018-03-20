@@ -17,6 +17,6 @@ From a terminal, descend into the Q2 directory: `cd Q2`. From there, build the p
 
 ### Question 3
 
-From a terminal, descend into the Q3 directory: `cd Q3`. The process of running Q3 is the exact same as question 2, although question 3 adds another executable program called `shutdown`.
+From a terminal, descend into the Q3 directory: `cd Q3`. The process of running question 3 is the exact same as question 2, although question 3 adds another executable program called `shutdown`.
 
 After the server and client are running, you can use the `shutdown` executable to effectively shut the server down. The shutdown program takes one argument, to run it use: `./shutdown <printer pid>`. To get the printer's Process ID (pid), look at the messages the printer outputs. Each message starts with `Printer  <number> ...`, that number is the printer's pid.
