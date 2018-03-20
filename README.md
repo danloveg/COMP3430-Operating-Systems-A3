@@ -11,10 +11,10 @@ All of the code has only been tested on Linux (Scientific and Ubuntu) and cannot
 
 ### Question 2
 
-From a terminal, descend into the Q2 directory `cd Q2`. From there, build the project files: `make`. Finally, run the print server/client by executing the manager: `./manager`.
+From a terminal, descend into the Q2 directory: `cd Q2`. From there, build the project files: `make`. Finally, run the print server/client by executing the manager: `./manager`.
 
 **Do not** make the mistake of running the client or the server on their own. This will not work since the manager sets up the environment for the client and server before physically running them with an `execv()` call. As well, the manager depends on the client and the server being in the same directory as it, so do not move the `client` or `server` executable files.
 
 ### Question 3
 
-From a terminal, descend into the Q3 directory `cd Q3`.
+From a terminal, descend into the Q3 directory: `cd Q3`.
