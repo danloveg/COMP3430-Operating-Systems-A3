@@ -137,7 +137,7 @@ bool leave(PrintRequest **req) {
 
 
 /**
- * Act on CTRL-C signal being received.
+ * Act on SIGUSR1 signal being received.
  *
  * @param int sig: The signal received.
  */
